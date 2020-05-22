@@ -23,7 +23,6 @@ export class Scene2 extends Phaser.Scene{
         this.load.image('balloonGreen','assets/images/balloon-green.png');
         this.load.image('balloonBlue','assets/images/balloon-blue.png');
         this.load.image('balloonRed','assets/images/balloon-red.png');
-
     }
 
 
@@ -37,7 +36,9 @@ export class Scene2 extends Phaser.Scene{
         this.balloonBlue= this.physics.add.group();
         this.balloonRed= this.physics.add.group();
 
-        this.physics.add.overlap(this.bird, this.balloonGreen, this.collectBalloon, 1, this);
+        this.physics.add.overlap(this.bird, this.balloonGreen, this.collectBalloon, null, this);
+        this.physics.add.overlap(this.bird, this.balloonBlue, this.collectBalloon, null, this);
+        this.physics.add.overlap(this.bird, this.balloonRed, this.collectBalloon, null, this);
         
 
 
@@ -139,13 +140,21 @@ export class Scene2 extends Phaser.Scene{
             }
         });
 
-     //   console.log(this.balloonBlue.countActive());
+        
 
     }
 
-    collectBalloon(score,balloonBlue){
-        balloonBlue.disableBody(true,true);
-        this.score += score;
+    collectBalloon(bird, balloon){
+        if (this.balloonGreen.contains(balloon)){
+            this.score += 1;
+        }else if(this.balloonBlue.contains(balloon)){
+            this.score += 5;
+        }else if(this.balloonRed.contains(balloon)){
+            this.score += 10;
+        }
+        
+        balloon.disableBody(true,true);
+        console.log("score: "+this.score);
     }
 
 }
