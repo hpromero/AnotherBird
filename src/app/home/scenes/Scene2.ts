@@ -7,8 +7,8 @@ export class Scene2 extends Phaser.Scene{
     balloonGreen: any;
     balloonBlue: any;
     balloonRed: any;
-    balloons: any;
     updates: integer = 0;
+    score: integer = 0;
 
     constructor(){
         super('scene2');
@@ -36,9 +36,8 @@ export class Scene2 extends Phaser.Scene{
         this.balloonGreen= this.physics.add.group();
         this.balloonBlue= this.physics.add.group();
         this.balloonRed= this.physics.add.group();
-        this.balloons= this.physics.add.group();
 
-        //this.physics.add.overlap(this.bird, this.balloonBlue, this.collectStar, null, this);
+        this.physics.add.overlap(this.bird, this.balloonGreen, this.collectBalloon, 1, this);
         
 
 
@@ -142,6 +141,11 @@ export class Scene2 extends Phaser.Scene{
 
      //   console.log(this.balloonBlue.countActive());
 
+    }
+
+    collectBalloon(score,balloonBlue){
+        balloonBlue.disableBody(true,true);
+        this.score += score;
     }
 
 }
