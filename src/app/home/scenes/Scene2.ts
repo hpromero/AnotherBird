@@ -17,19 +17,9 @@ export class Scene2 extends Phaser.Scene{
     timeText: Phaser.GameObjects.Text;
     gameOverText: Phaser.GameObjects.Text;
     highScoreText: Phaser.GameObjects.Text;
-    arrayScores = [];
+    arrayScores;
     gameRuning;
-    balloonData = [['balloonGreen',-50,4],
-                    ['balloonBlue',-100,14],
-                    ['balloonRed',-150,25],
-                    ['balloonStar',-170,60]];
-
-    /**
-     *  if (this.updates % (4*shooter) == 0){
-            this.balloonGreen.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, 'balloonGreen');
-            this.balloonGreen.setVelocityY(-50);
-        }
-     */
+    balloonData;
 
     constructor(){
         super('scene2');
@@ -41,6 +31,7 @@ export class Scene2 extends Phaser.Scene{
 
 
     preload(){
+        this.load.image('background','assets/images/sky.png');
         this.load.spritesheet('bird','assets/images/birdsprite.png',
         {frameWidth:35, frameHeight:33});
         this.load.image('arrowLeft','assets/images/arrow-left.png');
@@ -56,22 +47,22 @@ export class Scene2 extends Phaser.Scene{
 
 
     create(){
+        // SET INTIAL DATA
         this.gameRuning = true;
         this.timeOut = 120;
         this.updates = 0;
         this.score = 0;
         this.velocityExtra = 1;
         this.arrayScores = [];
+        this.balloonData = [['balloonGreen',-50,4],
+                            ['balloonBlue',-100,14],
+                            ['balloonRed',-150,25],
+                            ['balloonStar',-170,60]];
 
-// BORRAR -------
-        console.log(this.balloonData[0]);
-        console.log(this.balloonData[1]);
-        console.log(this.balloonData[2]);
-        console.log(this.balloonData[3]);
-// BORRA --------
 
+        // CRATE ELEMENTS
+        this.add.image(innerWidth/2,innerHeight/2,'background');
         this.bird=this.physics.add.sprite(innerWidth/2,innerHeight/3,'bird');
-        this.bird.setCollideWorldBounds(true);
         this.arrowLeft=this.add.image(30,innerHeight-30,'arrowLeft').setInteractive();
         this.arrowRight=this.add.image(innerWidth-30,innerHeight-30,'arrowRight').setInteractive();
         this.balloon= this.physics.add.group();
@@ -85,11 +76,14 @@ export class Scene2 extends Phaser.Scene{
         this.starSound=this.sound.add('starSound');
         this.music=this.sound.add('music');
 
-        this.music.play(this.musicConfig);
-
+        
+        //SET COLLINDERS AND OVERLAP
+        this.bird.setCollideWorldBounds(true);
         this.physics.add.overlap(this.bird, this.balloon, this.collectBalloon, null, this);
         
 
+
+        //SET ANIMES AND POINTERS
         this.anims.create({
             key: 'fly-left',
             frames: this.anims.generateFrameNumbers('bird',{ start: 15, end: 28}),
@@ -115,36 +109,27 @@ export class Scene2 extends Phaser.Scene{
             repeat: -1
         });
 
+        this.setPointers(this.arrowLeft,'pointerdown','fly-left',-150*this.velocityExtra);
+        this.setPointers(this.arrowLeft,'pointerup','stop-left',0);
+        this.setPointers(this.arrowRight,'pointerdown','fly-right',150*this.velocityExtra);
+        this.setPointers(this.arrowRight,'pointerup','stop-right',0);
 
 
-        
-
-
-        this.arrowLeft.on('pointerdown', function(){
-            this.bird.setVelocityX(-150*this.velocityExtra);
-            this.bird.anims.play('fly-left',true);
-        }, this);
-
-        this.arrowLeft.on('pointerup', function(){
-            this.bird.setVelocityX(0);
-            this.bird.anims.play('stop-left',true);
-        }, this);
-
-        this.arrowRight.on('pointerdown', function(){
-            this.bird.setVelocityX(150*this.velocityExtra);
-            this.bird.anims.play('fly-right',true);
-        }, this);
-
-        this.arrowRight.on('pointerup', function(){
-            this.bird.setVelocityX(0);
-            this.bird.anims.play('stop-right',true);
-        }, this);
-
-        this.setScoreText();
-
+        //START PLAY
+        this.music.play(this.musicConfig);
         this.bird.anims.play('stop-left',true);
+        this.setScoreText();
     }
-    
+
+
+    setPointers(image,type,accion,velocity){
+        image.on(type, function(){
+            this.bird.setVelocityX(velocity);
+            this.bird.anims.play(accion,true);
+        }, this);
+
+    }
+
 
     
     update(){
