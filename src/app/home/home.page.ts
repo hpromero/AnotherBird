@@ -18,7 +18,7 @@ export class HomePage {
     this.config = {
       width: innerWidth,
       height: innerHeight,
-      backgroundColor: '#48dbfb',
+      backgroundColor: '#59ABE3',
       physics: {
         default: 'arcade',
         arcade:{
@@ -26,8 +26,7 @@ export class HomePage {
         }
       },
       parent: 'game',
-//      scene: [Scene1,Scene2,Scene3]
-      scene: [Scene2,Scene3]
+      scene: [Scene1,Scene2,Scene3]
     }
   }
 

@@ -11,8 +11,6 @@ export class Scene2 extends Phaser.Scene{
     scoreText: Phaser.GameObjects.Text;
     starSound: Phaser.Sound.BaseSound;
     balloonSound: Phaser.Sound.BaseSound;
-    music: Phaser.Sound.BaseSound;
-    musicConfig: any;
     timeOut;
     timeText: Phaser.GameObjects.Text;
     gameOverText: Phaser.GameObjects.Text;
@@ -23,10 +21,6 @@ export class Scene2 extends Phaser.Scene{
 
     constructor(){
         super('scene2');
-
-        this.musicConfig = {
-            loop: true
-        };
     }
 
 
@@ -42,7 +36,6 @@ export class Scene2 extends Phaser.Scene{
         this.load.image('balloonStar','assets/images/balloon-star.png');
         this.load.audio('starSound', 'assets/sounds/star.mp3');
         this.load.audio('balloonSound', 'assets/sounds/balloon.mp3');
-        this.load.audio('music', 'assets/sounds/ost.mp3');
     }
 
 
@@ -60,8 +53,13 @@ export class Scene2 extends Phaser.Scene{
                             ['balloonStar',-170,60]];
 
 
+        // CRATE BACKGROUND
+        let background = this.add.image(innerWidth/2,innerHeight/2,'background');
+        if (background.width < innerWidth){
+            background.setScale(innerWidth/background.width);
+        }
+
         // CRATE ELEMENTS
-        this.add.image(innerWidth/2,innerHeight/2,'background');
         this.bird=this.physics.add.sprite(innerWidth/2,innerHeight/3,'bird');
         this.arrowLeft=this.add.image(30,innerHeight-30,'arrowLeft').setInteractive();
         this.arrowRight=this.add.image(innerWidth-30,innerHeight-30,'arrowRight').setInteractive();
@@ -74,7 +72,6 @@ export class Scene2 extends Phaser.Scene{
         this.highScoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.balloonSound=this.sound.add('balloonSound');
         this.starSound=this.sound.add('starSound');
-        this.music=this.sound.add('music');
 
         
         //SET COLLINDERS AND OVERLAP
@@ -116,7 +113,6 @@ export class Scene2 extends Phaser.Scene{
 
 
         //START PLAY
-        this.music.play(this.musicConfig);
         this.bird.anims.play('stop-left',true);
         this.setScoreText();
     }
@@ -134,25 +130,29 @@ export class Scene2 extends Phaser.Scene{
     
     update(){
         if (this.gameRuning){
+
             let newBalloon;
             this.updates++;
             let shooter = Phaser.Math.Between(2,6)*10;
             this.timeOut -= 0.016667;
             if (this.updates >= 3600) {this.updates = 0};
 
+            //CREATE BALLOONS
             for (let i=0; i<4 ;i++){
                 if (this.updates % (Number(this.balloonData[i][2])*shooter) == 0){
-                newBalloon = this.balloon.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, this.balloonData[i][0]);
+                newBalloon = this.balloon.create(Phaser.Math.Between(30,innerWidth-30), innerHeight+100, this.balloonData[i][0]);
                 newBalloon.setVelocityY(Number(this.balloonData[i][1]));
                 }
             }
 
+            //DISABLE LOST BALLOONS
             this.balloon.children.iterate(function(child){
                 if (child.y <= -30){
                     child.disableBody(true,true);
                 }
             });
             
+            //END GAME
             if (this.timeOut <=0){
                 this.gameOver();
                 this.timeOut = 0;
@@ -179,11 +179,9 @@ export class Scene2 extends Phaser.Scene{
             this.balloonSound.play();
         }
         
-        
         balloon.disableBody(true,true);
         this.scoreText.setText('Score: ' + this.score+' ');
 
-      
     }
 
     gameOver(){
