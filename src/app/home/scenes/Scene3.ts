@@ -1,8 +1,8 @@
 import * as Phaser from 'phaser';
 
 export class Scene3 extends Phaser.Scene{
-    highScore1;
-    scoreText;
+    textPosition = ["1ST:  ","2ND:  ","3RD:  ","4TH:  ","5TH:  "];
+    text;
 
     constructor(){
         super('scene3');
@@ -17,19 +17,33 @@ export class Scene3 extends Phaser.Scene{
     create(){
 
         let arrayScores = (localStorage.getItem('scores').split(','));
+        let yourScore = localStorage.getItem('yourScore');
 
 
-        this.highScore1=this.add.text(innerWidth/2,innerHeight/2-20,' '+arrayScores[0]+' ',{ font: "bold 50px Arial", fill: "#fff"});
-        this.highScore1.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
-        this.highScore1.setOrigin(0.5);
+        this.text=this.add.text(innerWidth/2,innerHeight/3-100,' HIGH SCORES ',{ font: "bold 50px Arial", fill: "#fff"});
+        this.text.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.text.setOrigin(0.5);
 
-      for(let i=2; i <= 5; i++){
-        this.scoreText=this.add.text(innerWidth/2,innerHeight/2+(i*40),i+': '+arrayScores[i-2]+' ',{ font: "bold 32px Arial", fill: "#fff"});
-        this.scoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
-        this.scoreText.setOrigin(0.5);
+      for(let i=1; i <=5; i++){
+        let style;
+        if (arrayScores[i-1]==yourScore){
+            style = { font: "bold 38px Arial", fill: "#d4af37"}
+        }else{
+            style = { font: "bold 30px Arial", fill: "#fff"}
+        }
+
+        this.text=this.add.text(innerWidth/2,innerHeight/3+(i*40),this.textPosition[i-1]+arrayScores[i-1]+' ',style);
+        this.text.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.text.setOrigin(0.5);
       }
+
+      this.text=this.add.text(innerWidth/2,innerHeight/2+200,' Play again ',{ font: "bold 40px Arial", fill: "#fff"}).setInteractive();
+        this.text.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.text.setOrigin(0.5);
      
-    
+        this.text.on('pointerdown',() =>{
+            this.scene.start('scene2');
+        },this);
             
       
     }

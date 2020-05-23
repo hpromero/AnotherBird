@@ -8,19 +8,20 @@ export class Scene2 extends Phaser.Scene{
     balloonBlue: any;
     balloonRed: any;
     balloonStar: any;
-    updates: integer = 0;
-    score: integer = 0;
-    velocityExtra: integer = 1;
+    updates: integer;
+    score: integer;
+    velocityExtra: integer;
     scoreText: Phaser.GameObjects.Text;
     starSound: Phaser.Sound.BaseSound;
     balloonSound: Phaser.Sound.BaseSound;
     music: Phaser.Sound.BaseSound;
     musicConfig: any;
-    timeOut = 30;
+    timeOut;
     timeText: Phaser.GameObjects.Text;
     gameOverText: Phaser.GameObjects.Text;
     highScoreText: Phaser.GameObjects.Text;
     arrayScores = [];
+    gameRuning;
 
     constructor(){
         super('scene2');
@@ -47,7 +48,13 @@ export class Scene2 extends Phaser.Scene{
 
 
     create(){
-        //this.add.text(50,50,'This is de scene2');
+        this.gameRuning = true;
+        this.timeOut = 120;
+        this.updates = 0;
+        this.score = 0;
+        this.velocityExtra = 1;
+        this.arrayScores = [];
+
         this.bird=this.physics.add.sprite(innerWidth/2,innerHeight/3,'bird');
         this.bird.setCollideWorldBounds(true);
         this.arrowLeft=this.add.image(30,innerHeight-30,'arrowLeft').setInteractive();
@@ -124,15 +131,7 @@ export class Scene2 extends Phaser.Scene{
             this.bird.setVelocityX(0);
             this.bird.anims.play('stop-right',true);
         }, this);
-/*
-        if (localStorage.getItem('highScore1')==null){
-            localStorage.setItem('highScore1',String(0));
-            localStorage.setItem('highScore2',String(0));
-            localStorage.setItem('highScore3',String(0));
-            localStorage.setItem('highScore4',String(0));
-            localStorage.setItem('highScore5',String(0));
-        }
-*/
+
         this.setScoreText();
 
         this.bird.anims.play('stop-left',true);
@@ -186,8 +185,7 @@ export class Scene2 extends Phaser.Scene{
             }
         });
         
-        if (this.timeOut <=0 && this.updates%60==0){
-            this.timeOut = 0;
+        if (this.timeOut <=0 && this.gameRuning){
             this.gameOver();
         }
             this.timeText.setText('Time: ' + Math.round(this.timeOut)+' ');
@@ -224,6 +222,7 @@ export class Scene2 extends Phaser.Scene{
     }
 
     gameOver(){
+        this.gameRuning = false;
         this.saveScore();
         this.physics.pause();
         this.gameOverText = this.add.text(innerWidth/2,innerHeight/2,'Game Over', { font: "bold 50px Arial", fill: "#fff"});
@@ -235,17 +234,16 @@ export class Scene2 extends Phaser.Scene{
     }
 
     saveScore(){
-        this.arrayScores.push(String(this.score));
-        console.log(this.arrayScores);
-        this.arrayScores.sort();
-        console.log(this.arrayScores);
+        this.arrayScores.push(this.score);
+        this.arrayScores.sort(function(a, b){return b-a});
         localStorage.setItem('scores',
                             this.arrayScores[0]+','+
                             this.arrayScores[1]+','+
                             this.arrayScores[2]+','+
                             this.arrayScores[3]+','+
                             this.arrayScores[4]);
-        console.log(localStorage.getItem('scores'));            
+        
+        localStorage.setItem('yourScore',String(this.score));
     }
 
     setScoreText(){
@@ -253,7 +251,10 @@ export class Scene2 extends Phaser.Scene{
             localStorage.setItem('scores','0,0,0,0,0');
         }
 
-        this.arrayScores = (localStorage.getItem('scores').split(','));
+        let arrayStringScores = (localStorage.getItem('scores').split(','));
+        arrayStringScores.forEach(element => {
+            this.arrayScores.push(Number(element))
+        });
 
         this.highScoreText.setText('High: '+this.arrayScores[0]);
         let textbound = this.highScoreText.getBounds();
