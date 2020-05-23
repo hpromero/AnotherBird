@@ -16,9 +16,11 @@ export class Scene2 extends Phaser.Scene{
     balloonSound: Phaser.Sound.BaseSound;
     music: Phaser.Sound.BaseSound;
     musicConfig: any;
-    timeOut = 120;
+    timeOut = 30;
     timeText: Phaser.GameObjects.Text;
     gameOverText: Phaser.GameObjects.Text;
+    highScoreText: Phaser.GameObjects.Text;
+    arrayScores = [];
 
     constructor(){
         super('scene2');
@@ -58,6 +60,8 @@ export class Scene2 extends Phaser.Scene{
         this.scoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.timeText=this.add.text(16,48,'Time:',{ font: "bold 20px Arial", fill: "#fff"});
         this.timeText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.highScoreText=this.add.text(0,0,'High:',{ font: "bold 20px Arial", fill: "#fff"});
+        this.highScoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.balloonSound=this.sound.add('balloonSound');
         this.starSound=this.sound.add('starSound');
         this.music=this.sound.add('music');
@@ -120,17 +124,18 @@ export class Scene2 extends Phaser.Scene{
             this.bird.setVelocityX(0);
             this.bird.anims.play('stop-right',true);
         }, this);
-
-
-        console.log(this.data.get('highScore1'));
-
-
+/*
+        if (localStorage.getItem('highScore1')==null){
+            localStorage.setItem('highScore1',String(0));
+            localStorage.setItem('highScore2',String(0));
+            localStorage.setItem('highScore3',String(0));
+            localStorage.setItem('highScore4',String(0));
+            localStorage.setItem('highScore5',String(0));
+        }
+*/
+        this.setScoreText();
 
         this.bird.anims.play('stop-left',true);
-
-        
-        
-
     }
 
     
@@ -181,7 +186,7 @@ export class Scene2 extends Phaser.Scene{
             }
         });
         
-        if (this.timeOut <=0){
+        if (this.timeOut <=0 && this.updates%60==0){
             this.timeOut = 0;
             this.gameOver();
         }
@@ -219,6 +224,7 @@ export class Scene2 extends Phaser.Scene{
     }
 
     gameOver(){
+        this.saveScore();
         this.physics.pause();
         this.gameOverText = this.add.text(innerWidth/2,innerHeight/2,'Game Over', { font: "bold 50px Arial", fill: "#fff"});
         this.gameOverText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
@@ -228,6 +234,31 @@ export class Scene2 extends Phaser.Scene{
         },5000)
     }
 
+    saveScore(){
+        this.arrayScores.push(String(this.score));
+        console.log(this.arrayScores);
+        this.arrayScores.sort();
+        console.log(this.arrayScores);
+        localStorage.setItem('scores',
+                            this.arrayScores[0]+','+
+                            this.arrayScores[1]+','+
+                            this.arrayScores[2]+','+
+                            this.arrayScores[3]+','+
+                            this.arrayScores[4]);
+        console.log(localStorage.getItem('scores'));            
+    }
+
+    setScoreText(){
+        if(localStorage.getItem('scores')==null){
+            localStorage.setItem('scores','0,0,0,0,0');
+        }
+
+        this.arrayScores = (localStorage.getItem('scores').split(','));
+
+        this.highScoreText.setText('High: '+this.arrayScores[0]);
+        let textbound = this.highScoreText.getBounds();
+        this.highScoreText.setPosition(innerWidth-textbound.width-16,16);
+    }
     
 
 }
