@@ -4,10 +4,7 @@ export class Scene2 extends Phaser.Scene{
     bird: Phaser.Physics.Arcade.Sprite;
     arrowLeft: Phaser.GameObjects.Image;
     arrowRight: Phaser.GameObjects.Image;
-    balloonGreen: any;
-    balloonBlue: any;
-    balloonRed: any;
-    balloonStar: any;
+    balloon: any;
     updates: integer;
     score: integer;
     velocityExtra: integer;
@@ -22,6 +19,17 @@ export class Scene2 extends Phaser.Scene{
     highScoreText: Phaser.GameObjects.Text;
     arrayScores = [];
     gameRuning;
+    balloonData = [['balloonGreen',-50,4],
+                    ['balloonBlue',-100,14],
+                    ['balloonRed',-150,25],
+                    ['balloonStar',-170,60]];
+
+    /**
+     *  if (this.updates % (4*shooter) == 0){
+            this.balloonGreen.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, 'balloonGreen');
+            this.balloonGreen.setVelocityY(-50);
+        }
+     */
 
     constructor(){
         super('scene2');
@@ -55,14 +63,18 @@ export class Scene2 extends Phaser.Scene{
         this.velocityExtra = 1;
         this.arrayScores = [];
 
+// BORRAR -------
+        console.log(this.balloonData[0]);
+        console.log(this.balloonData[1]);
+        console.log(this.balloonData[2]);
+        console.log(this.balloonData[3]);
+// BORRA --------
+
         this.bird=this.physics.add.sprite(innerWidth/2,innerHeight/3,'bird');
         this.bird.setCollideWorldBounds(true);
         this.arrowLeft=this.add.image(30,innerHeight-30,'arrowLeft').setInteractive();
         this.arrowRight=this.add.image(innerWidth-30,innerHeight-30,'arrowRight').setInteractive();
-        this.balloonGreen= this.physics.add.group();
-        this.balloonBlue= this.physics.add.group();
-        this.balloonRed= this.physics.add.group();
-        this.balloonStar= this.physics.add.group();
+        this.balloon= this.physics.add.group();
         this.scoreText=this.add.text(16,16,'Score: 0',{ font: "bold 24px Arial", fill: "#fff"});
         this.scoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.timeText=this.add.text(16,48,'Time:',{ font: "bold 20px Arial", fill: "#fff"});
@@ -75,12 +87,8 @@ export class Scene2 extends Phaser.Scene{
 
         this.music.play(this.musicConfig);
 
-        this.physics.add.overlap(this.bird, this.balloonGreen, this.collectBalloon, null, this);
-        this.physics.add.overlap(this.bird, this.balloonBlue, this.collectBalloon, null, this);
-        this.physics.add.overlap(this.bird, this.balloonRed, this.collectBalloon, null, this);
-        this.physics.add.overlap(this.bird, this.balloonStar, this.collectBalloon, null , this);
+        this.physics.add.overlap(this.bird, this.balloon, this.collectBalloon, null, this);
         
-
 
         this.anims.create({
             key: 'fly-left',
@@ -136,73 +144,40 @@ export class Scene2 extends Phaser.Scene{
 
         this.bird.anims.play('stop-left',true);
     }
+    
 
     
     update(){
-        this.updates++;
-        let shooter = Phaser.Math.Between(2,6)*10;
-        this.timeOut -= 0.016667;
-        if (this.updates >= 3600) {this.updates = 0};
-        
-        
+        if (this.gameRuning){
+            let newBalloon;
+            this.updates++;
+            let shooter = Phaser.Math.Between(2,6)*10;
+            this.timeOut -= 0.016667;
+            if (this.updates >= 3600) {this.updates = 0};
 
-        if (this.updates % (4*shooter) == 0){
-            this.balloonGreen.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, 'balloonGreen');
-            this.balloonGreen.setVelocityY(-50);
-        }
-
-        if (this.updates % (14*shooter) == 0){
-            this.balloonBlue.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, 'balloonBlue');
-            this.balloonBlue.setVelocityY(-100);
-            console.log();
-        }
-
-        if (this.updates % (25*shooter) == 0){
-            this.balloonRed.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, 'balloonRed');
-            this.balloonRed.setVelocityY(-150);
-        }
-        
-        if (this.updates % (55*shooter) == 0){
-            this.balloonStar.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, 'balloonStar');
-            this.balloonStar.setVelocityY(-150);
-        }
-        
-
-
-
-        this.balloonGreen.children.iterate(function(child){
-            if (child.y <= -30){
-                child.disableBody(true,true);
+            for (let i=0; i<4 ;i++){
+                if (this.updates % (Number(this.balloonData[i][2])*shooter) == 0){
+                newBalloon = this.balloon.create(Phaser.Math.Between(30,innerWidth-30), innerHeight, this.balloonData[i][0]);
+                newBalloon.setVelocityY(Number(this.balloonData[i][1]));
+                }
             }
-        });
-        this.balloonBlue.children.iterate(function(child){
-            if (child.y <= -30){
-                child.disableBody(true,true);
+
+            this.balloon.children.iterate(function(child){
+                if (child.y <= -30){
+                    child.disableBody(true,true);
+                }
+            });
+            
+            if (this.timeOut <=0){
+                this.gameOver();
+                this.timeOut = 0;
             }
-        });this.balloonRed.children.iterate(function(child){
-            if (child.y <= -30){
-                child.disableBody(true,true);
-            }
-        });
-        
-        if (this.timeOut <=0 && this.gameRuning){
-            this.gameOver();
-        }
-            this.timeText.setText('Time: ' + Math.round(this.timeOut)+' ');
-        
+                this.timeText.setText('Time: ' + Math.round(this.timeOut)+' ');
+        }  
     }
 
     collectBalloon(bird, balloon){
-        if (this.balloonGreen.contains(balloon)){
-            this.score += 1;
-            this.balloonSound.play();
-        }else if(this.balloonBlue.contains(balloon)){
-            this.score += 5;
-            this.balloonSound.play();
-        }else if(this.balloonRed.contains(balloon)){
-            this.score += 10;
-            this.balloonSound.play();
-        }else if(this.balloonStar.contains(balloon)){
+        if(balloon.body.velocity.y==(-170)){
             this.velocityExtra = 2;
             bird.setTint('0xFFF200');
             bird.alpha = 0.7;
@@ -213,12 +188,17 @@ export class Scene2 extends Phaser.Scene{
                 bird.setTint('0xffffff');
                 bird.alpha = 1;
             },15000)
+
+        }else{
+            this.score += balloon.body.velocity.y/(-25);
+            this.balloonSound.play();
         }
+        
         
         balloon.disableBody(true,true);
         this.scoreText.setText('Score: ' + this.score+' ');
 
-       
+      
     }
 
     gameOver(){
