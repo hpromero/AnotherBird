@@ -11,6 +11,7 @@ export class Scene2 extends Phaser.Scene{
     scoreText: Phaser.GameObjects.Text;
     starSound: Phaser.Sound.BaseSound;
     balloonSound: Phaser.Sound.BaseSound;
+    cursors: any;
     timeOut;
     timeText: Phaser.GameObjects.Text;
     gameOverText: Phaser.GameObjects.Text;
@@ -18,6 +19,7 @@ export class Scene2 extends Phaser.Scene{
     arrayScores;
     gameRuning;
     balloonData;
+    cursorPress: boolean;
 
     constructor(){
         super('scene2');
@@ -72,7 +74,9 @@ export class Scene2 extends Phaser.Scene{
         this.highScoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.balloonSound=this.sound.add('balloonSound');
         this.starSound=this.sound.add('starSound');
+        this.cursors = this.input.keyboard.createCursorKeys();
 
+        
         
         //SET COLLINDERS AND OVERLAP
         this.bird.setCollideWorldBounds(true);
@@ -159,6 +163,24 @@ export class Scene2 extends Phaser.Scene{
             }
                 this.timeText.setText('Time: ' + Math.round(this.timeOut)+' ');
         }  
+
+        //CURSORS KEYBOARD, JUST FOR TEST IN BROWSER
+        if (this.cursors.left.isDown){
+            this.bird.setVelocityX(-150*this.velocityExtra)
+            this.bird.anims.play('fly-left',true);
+            this.cursorPress = true;
+        }else if(this.cursors.right.isDown){
+            this.bird.setVelocityX(150*this.velocityExtra)
+            this.bird.anims.play('fly-right',true);
+            this.cursorPress = true;
+        }else{
+            if (this.cursorPress){
+                this.bird.setVelocityX(0)
+                this.bird.anims.play('stop-left',true);
+                this.cursorPress = false;
+            }
+          
+        }
     }
 
     collectBalloon(bird, balloon){
